@@ -4,8 +4,7 @@
     ViewData["Title"] = "Home page";
 }
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.2/css/bootstrap-select.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.0.1/css/bootstrap.min.css">
+
 <link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap5.min.css">
 <link rel="stylesheet" href="https://cdn.datatables.net/buttons/1.7.1/css/buttons.bootstrap5.min.css">
 
@@ -36,7 +35,7 @@
                     <div class="form-group col-md-2" style="text-align:right">
                         <!-- Button trigger modal -->
                         <button type="button" id="btnAdd" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-                            Adiconar Cidade  <i class="fas fa-plus"></i>
+                            Adicionar Cidade  <i class="fas fa-plus"></i>
                         </button>
                     </div>
                 </div>
@@ -56,23 +55,23 @@
                             <div class="container-fluid">
                                 <div class="row">
                                     <div class="mb-3 row">
-                                        <label for="lblIBGE" class="col-sm-3 col-form-label">Digite o IBGE</label>
+                                        <label for="idIBGE" class="col-sm-3 col-form-label">Digite o IBGE</label>
                                         <div class="col-sm-4">
                                             <input type="text" class="form-control" id="idIBGE" maxlength="7" placeholder="1100015" required>
                                             <div class="invalid-feedback">
                                                 O campo é obrigatório
                                             </div>
                                         </div>
-                                        <label for="lblUF" class="col-sm-3 col-form-label">Digite a UF</label>
+                                        <label for="idUF" class="col-sm-3 col-form-label">Digite a UF</label>
                                         <div class="col-sm-2">
-                                            <input type="text" class="form-control" id="idUF" maxlength="2" placeholder="SP" required>
+                                            <input type="text" class="form-control" id="idUF" oninput="check(this) maxlength="2" placeholder="SP" required>
                                             <div class="invalid-feedback">
                                                 O campo é obrigatório
                                             </div>
                                         </div>
                                     </div>
                                     <div class="mb-3 row">
-                                        <label for="lblName" class="col-sm-3 col-form-label">Digite o Nome</label>
+                                        <label for="idName" class="col-sm-3 col-form-label">Digite o Nome</label>
                                         <div class="col-sm-9">
                                             <input type="text" class="form-control" id="idName" maxlength="100" placeholder="São Paulo" required>
                                             <div class="invalid-feedback">
@@ -81,14 +80,14 @@
                                         </div>
                                     </div>
                                     <div class="mb-4 row">
-                                        <label for="lblLatitude" class="col-sm-3 col-form-label">Digite a Latitude</label>
+                                        <label for="idLat" class="col-sm-3 col-form-label">Digite a Latitude</label>
                                         <div class="col-sm-3">
                                             <input type="text" class="form-control" id="idLat" maxlength="20" placeholder="-619.998.238.963" required>
                                             <div class="invalid-feedback">
                                                 O campo é obrigatório
                                             </div>
                                         </div>
-                                        <label for="lblLongitude" class="col-sm-3 col-form-label">Digite a Latitude</label>
+                                        <label for="idLong" class="col-sm-3 col-form-label">Digite a Latitude</label>
                                         <div class="col-sm-3">
                                             <input type="text" class="form-control" id="idLong" maxlength="20" placeholder="-119.355.403.048" required>
                                             <div class="invalid-feedback">
@@ -97,7 +96,7 @@
                                         </div>
                                     </div>
                                     <div class="mb-3 row">
-                                        <label for="lblRegion" class="col-sm-3 col-form-label">Digite a Região</label>
+                                        <label for="idRegion" class="col-sm-3 col-form-label">Digite a Região</label>
                                         <div class="col-sm-9">
                                             <input type="text" class="form-control" id="idRegion" maxlength="100" placeholder="Metropolitana de So Paulo" required>
                                             <div class="invalid-feedback">
@@ -147,7 +146,7 @@
 
 @section scripts
 {
-    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.js"></script> 
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/dataTables.buttons.min.js"></script>
@@ -160,10 +159,17 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/buttons/1.7.1/js/buttons.colVis.min.js"></script>
 
-
     <script type="text/javascript">
         var urlapi = 'http://localhost:65045/api/';
         var idcity = '';
+
+        $(window).on('load', function () {
+            var Parametros = { 'ibge': 0, 'uf': '', 'nameCity': '', 'region': '' };
+
+            LoadingData(Parametros);
+            LoadingUF();
+        });
+
         (function () {
             'use strict';
             window.addEventListener('load', function () {
@@ -180,35 +186,7 @@
                     }, false);
                 });
             }, false);
-        })();
-
-        $(window).on('load', function () {
-            var Parametros = { 'ibge': 0, 'uf': '', 'nameCity': '', 'region': '' };
-
-            LoadingData(Parametros);
-            LoadingUF();
-        });
-
-        function LoadingUF() {
-            $.ajax({
-                type: 'get',
-                url: urlapi + 'RegisterCity/UF',
-                contentType: "application/json",
-                async: true,
-                headers: { 'Access-Control-Allow-Headers': 'Content-Type, Authorization' },
-                processData: false,
-                contentType: "application/json",
-                success: function (request) {
-                    request.uf.forEach(function (item) {
-                        $('#cmbUF').append('<option value =' + item.uf + '>' + item.uf + '</option>');
-
-                    });
-
-                }, error: function (request) {
-                    console.log(request);
-                }
-            });
-        }
+        })();   
 
         $("#cmbUF").change(function () {
             var Parametros = { 'ibge': 0, 'uf': $('#cmbUF').val(), 'nameCity': '', 'region': '' };
@@ -284,12 +262,11 @@
                     console.log(request);
                 }
             });
-        }
-
+        }    
 
         $("#btnSave").on("click", function () {
             var Parametros = { 'ibge': parseInt($("#idIBGE").val()), 'uf': $("#idUF").val(), 'nameCity': $("#idName").val(), 'latitude': $("#idLat").val(), 'longitude': $("#idLong").val(), 'region': $("#idRegion").val() };
-                    
+
             $.ajax({
                 type: 'post',
                 url: urlapi + 'RegisterCity/Register',
@@ -298,7 +275,7 @@
                 headers: { 'Access-Control-Allow-Headers': 'Content-Type, Authorization' },
                 processData: false,
                 contentType: "application/json",
-                success: function (request) {         
+                success: function (request) {
                     alert(request.statusDescription);
                     $('#staticBackdrop').modal('hide');
                 }, error: function (error) {
